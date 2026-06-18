@@ -58,6 +58,13 @@
             display: none; align-items: center; gap: 10px;
         }
         #music-controls.visible { display: flex; }
+        #music-controls.needs-tap #mute-btn {
+            animation: needsTapPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes needsTapPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.35); }
+            50%     { box-shadow: 0 0 0 6px rgba(201,168,76,0); }
+        }
         #mute-btn {
             width: 38px; height: 38px; border-radius: 50%;
             background: rgba(12,12,20,0.75); border: 1px solid var(--border);
@@ -545,6 +552,8 @@ var bgAudio       = null;
 var bgMuted       = false;
 var bgVolume      = 0.28;   // default: quiet
 var videoDucked   = false;
+var _bgResumeActive = false; // tracks whether the autoplay-retry listeners are attached
+var _bgWatchdog    = null;   // safety net: catches "stuck ducked at near-zero" forever
 
 function sched(fn, d) { animTimers.push(setTimeout(fn, d)); }
 function clearAnim()  { animTimers.forEach(clearTimeout); animTimers = []; }
@@ -553,40 +562,113 @@ function clearAnim()  { animTimers.forEach(clearTimeout); animTimers = []; }
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  BACKGROUND MUSIC (music.mp3)                               ║
 // ╚══════════════════════════════════════════════════════════════╝
+//
+// Fix notes (music not resuming on a 2nd / refreshed visit):
+// 1. The old code attached one-shot "resume" listeners that removed
+//    themselves after the FIRST click/tap, even if play() failed again
+//    (e.g. the click landed on something that opened a video modal,
+//    which can itself interfere). If that first attempt didn't truly
+//    succeed, music never got another chance to start.
+// 2. Listeners now stay attached (and run in the CAPTURE phase, so
+//    they fire before other click handlers like opening a modal) until
+//    bgAudio.play() actually resolves successfully.
+// 3. A watchdog interval double-checks every few seconds that audio
+//    isn't silently paused or stuck "ducked" near-zero volume forever
+//    (which can happen if a YouTube embed errors before reaching the
+//    PLAYING state, so unduckMusic() never gets called).
 
 function initBgMusic() {
-    bgAudio = new Audio('music.mp3');
-    bgAudio.loop   = true;
-    bgAudio.volume = bgVolume;
-    bgAudio.preload = 'auto';
+    if (!bgAudio) {
+        bgAudio = new Audio('music.mp3');
+        bgAudio.loop   = true;
+        bgAudio.volume = bgVolume;
+        bgAudio.preload = 'auto';
+
+        // Mute button logic (attach once)
+        document.getElementById('mute-btn').addEventListener('click', function() {
+            bgMuted = !bgMuted;
+            if (bgAudio) bgAudio.muted = bgMuted;
+            document.getElementById('icon-sound').style.display = bgMuted ? 'none'  : '';
+            document.getElementById('icon-muted').style.display = bgMuted ? ''      : 'none';
+            // A manual tap on the mute button also counts as a user
+            // gesture — use it as a last-resort way to kick playback.
+            if (!bgMuted) attemptBgPlay();
+        });
+
+        startBgWatchdog();
+    }
 
     // Show mute button
     document.getElementById('music-controls').classList.add('visible');
 
-    // Mute button logic
-    document.getElementById('mute-btn').addEventListener('click', function() {
-        bgMuted = !bgMuted;
-        if (bgAudio) bgAudio.muted = bgMuted;
-        document.getElementById('icon-sound').style.display = bgMuted ? 'none'  : '';
-        document.getElementById('icon-muted').style.display = bgMuted ? ''      : 'none';
-    });
+    attemptBgPlay();
+}
 
-    // Try to play immediately; browsers may block until user interacts
+// Tries to play bg music. If the browser blocks autoplay, keeps a
+// persistent resume listener alive until play() actually succeeds —
+// not just until the first attempt (unlike the previous version).
+function attemptBgPlay() {
+    if (!bgAudio) return;
     var playAttempt = bgAudio.play();
-    if (playAttempt !== undefined) {
-        playAttempt.catch(function() {
-            // Autoplay blocked — play on first user interaction
-            var resume = function() {
-                bgAudio.play().catch(function(){});
-                document.removeEventListener('click', resume);
-                document.removeEventListener('touchstart', resume);
-                document.removeEventListener('keydown', resume);
-            };
-            document.addEventListener('click', resume);
-            document.addEventListener('touchstart', resume);
-            document.addEventListener('keydown', resume);
-        });
-    }
+    if (playAttempt === undefined) return;
+    playAttempt.then(function() {
+        removeBgResumeListeners();
+        document.getElementById('music-controls').classList.remove('needs-tap');
+    }).catch(function() {
+        addBgResumeListeners();
+        document.getElementById('music-controls').classList.add('needs-tap');
+    });
+}
+
+function addBgResumeListeners() {
+    if (_bgResumeActive) return;
+    _bgResumeActive = true;
+    // Capture phase so this runs before other click handlers
+    // (e.g. a dash-card opening a video modal) get a chance to run.
+    document.addEventListener('click', bgResumeHandler, true);
+    document.addEventListener('touchstart', bgResumeHandler, true);
+    document.addEventListener('keydown', bgResumeHandler, true);
+}
+function removeBgResumeListeners() {
+    if (!_bgResumeActive) return;
+    _bgResumeActive = false;
+    document.removeEventListener('click', bgResumeHandler, true);
+    document.removeEventListener('touchstart', bgResumeHandler, true);
+    document.removeEventListener('keydown', bgResumeHandler, true);
+}
+function bgResumeHandler() {
+    if (!bgAudio) return;
+    if (!bgAudio.paused) { removeBgResumeListeners(); return; }
+    bgAudio.play().then(function() {
+        removeBgResumeListeners();
+        document.getElementById('music-controls').classList.remove('needs-tap');
+    }).catch(function() { /* still blocked — keep listening, try again next gesture */ });
+}
+
+// Safety net: every few seconds, verify music is actually progressing
+// and not silently paused or stuck ducked at ~0 volume forever.
+function startBgWatchdog() {
+    if (_bgWatchdog) return;
+    _bgWatchdog = setInterval(function() {
+        if (!bgAudio) return;
+        // If it's paused and we're not in the middle of a deliberate
+        // stop, try to resume (covers edge cases where a play()
+        // promise resolved but playback later stalled silently).
+        if (bgAudio.paused && !bgMuted && document.getElementById('music-controls').classList.contains('visible')) {
+            attemptBgPlay();
+        }
+        // If ducked and not currently being held down by an active
+        // video/modal, make sure it actually recovers — covers cases
+        // where a YouTube embed errored before reaching PLAYING/ENDED
+        // and unduckMusic() was never called.
+        if (videoDucked && !isAnyVideoActive()) {
+            unduckMusic();
+        }
+    }, 3000);
+}
+
+function isAnyVideoActive() {
+    return !!(videoPlayer || modalPlayer);
 }
 
 // Duck music while a YT video plays, restore when it pauses/ends
