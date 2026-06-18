@@ -49,7 +49,6 @@
         }
         #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        /* Title area — always in DOM, fades in after animation */
         .splash-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: clamp(22px,5.5vw,46px); font-weight: 300;
@@ -62,12 +61,10 @@
             opacity: 0; transition: opacity 0.9s ease;
         }
 
-        /* Math phase wrapper */
         #math-phase {
             display: flex; flex-direction: column; align-items: center;
             position: relative; transition: filter 0.6s ease;
         }
-        /* After animation the SVG becomes the play button */
         #math-phase.interactive {
             cursor: pointer;
             filter: drop-shadow(0 0 20px rgba(201,168,76,0.08));
@@ -79,12 +76,10 @@
             stroke: rgba(201,168,76,0.85);
         }
 
-        /* SVG */
         #math-svg {
             width: min(280px,70vw); height: min(280px,70vw);
         }
 
-        /* SVG drawing animations */
         @keyframes drawCircle { to { stroke-dashoffset: 0; } }
         @keyframes drawLine117 { to { stroke-dashoffset: 0; } }
         @keyframes drawLine120 { to { stroke-dashoffset: 0; } }
@@ -96,7 +91,6 @@
             0%,100% { fill: rgba(201,168,76,0.18); }
             50%     { fill: rgba(201,168,76,0.30); }
         }
-        /* SVG ripple rings (shown once interactive) */
         @keyframes svgRipple {
             0%,100% { transform: scale(1); opacity: 0.85; }
             50%     { transform: scale(1.18); opacity: 0; }
@@ -114,7 +108,6 @@
         #svg-fill.filled     { fill: rgba(201,168,76,0.18) !important; }
         #svg-fill.pulse      { animation: triPulse 0.6s ease; }
 
-        /* Formula display */
         #formula-display {
             height: 28px; display: flex; align-items: center; justify-content: center;
             margin-top: 18px; transition: opacity 0.5s ease;
@@ -127,7 +120,6 @@
             transition: opacity 0.22s ease; white-space: nowrap;
         }
 
-        /* "Tap to begin" hint */
         #play-hint {
             font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
             color: var(--text-muted); margin-top: 20px;
@@ -135,7 +127,6 @@
         }
         #play-hint.visible { opacity: 0.5; }
 
-        /* Skip intro */
         #skip-intro {
             position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
             font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -232,6 +223,154 @@
         .replay-btn { display: block; margin: 0 auto; padding: 14px 36px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.5); color: var(--accent); font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .replay-btn:hover { background: rgba(201,168,76,0.18); box-shadow: 0 0 24px rgba(201,168,76,0.12); }
 
+        /* ===== MISTY CLOUD EASTER EGG ===== */
+        #cloud-egg {
+            position: relative;
+            width: 100%;
+            max-width: 940px;
+            margin: 52px auto 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The mist/cloud container */
+        #cloud-mist {
+            position: relative;
+            width: min(320px, 88vw);
+            height: 110px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        #cloud-mist:hover { transform: scale(1.04); }
+        #cloud-mist:hover #cloud-svg { opacity: 0.85; }
+        #cloud-mist:hover .cloud-label { opacity: 1; }
+
+        /* SVG cloud shape */
+        #cloud-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.65;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Text inside cloud */
+        .cloud-label {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            opacity: 0.8;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .cloud-label-main {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(14px, 3.5vw, 17px);
+            font-weight: 400;
+            color: var(--accent-light);
+            letter-spacing: 0.02em;
+            line-height: 1.4;
+            display: block;
+        }
+        .cloud-label-sub {
+            font-size: 9px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Pulsing glow animation for cloud */
+        @keyframes cloudPulse {
+            0%, 100% { filter: drop-shadow(0 0 18px rgba(201,168,76,0.06)); }
+            50%       { filter: drop-shadow(0 0 32px rgba(201,168,76,0.18)); }
+        }
+        #cloud-mist { animation: cloudPulse 4s ease-in-out infinite; }
+
+        /* The revealed content */
+        #perk-reveal {
+            width: 100%;
+            max-width: 520px;
+            margin-top: 0;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 1.4s cubic-bezier(0.16,1,0.3,1),
+                        opacity 1.1s ease,
+                        margin-top 1.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        #perk-reveal.open {
+            max-height: 900px;
+            opacity: 1;
+            margin-top: 32px;
+        }
+
+        #perk-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 16px 24px;
+        }
+
+        /* perk.png slides in from side */
+        #perk-img {
+            width: min(420px, 86vw);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: translateX(60px);
+            opacity: 0;
+            transition: transform 1.2s cubic-bezier(0.16,1,0.3,1) 0.25s,
+                        opacity 1.0s ease 0.25s;
+            display: block;
+        }
+        #perk-reveal.open #perk-img {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        #perk-caption {
+            margin-top: 24px;
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(16px, 3.8vw, 22px);
+            font-weight: 400;
+            line-height: 1.7;
+            color: var(--text);
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.9s ease 0.9s, transform 0.9s ease 0.9s;
+        }
+        #perk-reveal.open #perk-caption { opacity: 1; transform: translateY(0); }
+
+        #perk-caption .perk-sig {
+            display: block;
+            font-style: normal;
+            font-weight: 500;
+            color: var(--accent);
+            margin-top: 12px;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+
+        /* hide cloud once revealed */
+        #cloud-mist.revealed {
+            pointer-events: none;
+            animation: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            height: 0;
+            overflow: hidden;
+        }
+
         /* ===== MODAL ===== */
         #modal-overlay { position: fixed; inset: 0; background: rgba(6,6,12,0.88); backdrop-filter: blur(10px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
         #modal-overlay.visible { opacity: 1; visibility: visible; }
@@ -259,6 +398,7 @@
             .dash-card-body { padding: 12px 14px; }
             .dash-card-title { font-size: 16px; }
             #experience { padding: 32px 16px 80px; }
+            #perk-img { width: min(340px, 90vw); }
         }
         @media (max-width: 400px) { .dash-grid { grid-template-columns: 1fr; } }
         ::-webkit-scrollbar { width: 5px; }
@@ -275,11 +415,9 @@
 <!-- ====== SPLASH SCREEN ====== -->
 <div id="splash-screen">
 
-    <!-- Title fades in after animation -->
     <div class="splash-title" id="sp-title">Farewell, Mrs Muhammad</div>
     <div class="splash-subtitle" id="sp-sub">A tribute to the greatest maths teacher!</div>
 
-    <!-- Math Phase: SVG stays visible the whole time, becomes the play button -->
     <div id="math-phase">
         <svg id="math-svg" viewBox="-120 -120 240 240" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -288,7 +426,6 @@
                 </pattern>
             </defs>
 
-            <!-- Grid (fades out after animation) -->
             <rect id="svg-grid" x="-120" y="-120" width="240" height="240" fill="url(#gp)" style="opacity:0;transition:opacity 0.7s"/>
             <g id="svg-mgrid" style="opacity:0;transition:opacity 0.7s">
                 <line x1="-60" y1="-115" x2="-60" y2="115" stroke="rgba(240,235,227,0.055)" stroke-width="0.5"/>
@@ -296,7 +433,6 @@
                 <line x1="-115" y1="-60" x2="115" y2="-60" stroke="rgba(240,235,227,0.055)" stroke-width="0.5"/>
                 <line x1="-115" y1="60"  x2="115" y2="60"  stroke="rgba(240,235,227,0.055)" stroke-width="0.5"/>
             </g>
-            <!-- Axes (fade out after animation) -->
             <g id="svg-axes" style="opacity:0;transition:opacity 0.7s">
                 <line x1="-115" y1="0" x2="112" y2="0" stroke="rgba(240,235,227,0.18)" stroke-width="0.8"/>
                 <line x1="0" y1="-115" x2="0" y2="112" stroke="rgba(240,235,227,0.18)" stroke-width="0.8"/>
@@ -304,7 +440,6 @@
                 <polygon points="0,-112 -3,-107 3,-107" fill="rgba(240,235,227,0.18)"/>
                 <text x="108" y="-8"   fill="rgba(240,235,227,0.15)" font-size="9" font-family="serif" font-style="italic">x</text>
                 <text x="7"   y="-106" fill="rgba(240,235,227,0.15)" font-size="9" font-family="serif" font-style="italic">y</text>
-                <!-- Tick marks -->
                 <line x1="-50" y1="-3" x2="-50" y2="3" stroke="rgba(240,235,227,0.12)" stroke-width="0.5"/>
                 <text x="-50" y="12" fill="rgba(240,235,227,0.1)" font-size="7" text-anchor="middle" font-family="serif">−5</text>
                 <line x1="50"  y1="-3" x2="50"  y2="3" stroke="rgba(240,235,227,0.12)" stroke-width="0.5"/>
@@ -315,75 +450,44 @@
                 <text x="-9" y="63"  fill="rgba(240,235,227,0.1)" font-size="7" text-anchor="end" font-family="serif">−6</text>
             </g>
 
-            <!-- Ripple rings: appear once interactive -->
             <circle id="svg-ripple1" cx="0" cy="0" r="90" fill="none" stroke="rgba(201,168,76,0.08)" stroke-width="1.5"/>
             <circle id="svg-ripple2" cx="0" cy="0" r="90" fill="none" stroke="rgba(201,168,76,0.05)" stroke-width="1"/>
 
-            <!--
-                CIRCLE: x² + y² = 9²  →  r = 90 SVG units (scale ×10)
-                circumference = 2π×90 ≈ 565.49
-            -->
             <circle id="svg-circle" cx="0" cy="0" r="90"
                 fill="none" stroke="rgba(201,168,76,0.55)" stroke-width="1.8"
                 style="stroke-dasharray:565.49;stroke-dashoffset:565.49;transition:stroke 0.5s,stroke-width 0.5s,opacity 0.7s"/>
 
-            <!--
-                TRIANGLE — pointing RIGHT (play button ▶)
-                Math coords: A(5,0)  B(−5,−6)  C(−5,6)   (scale ×10 for SVG)
-                SVG  coords: A(50,0) B(−50,−60) C(−50,60)
-
-                Line AB: from A(50,0) to B(−50,−60)
-                  slope = (−60−0)/(−50−50) = −60/−100 = 3/5
-                  y − 0 = 3/5(x − 5)  →  y = 3/5·x − 3   [math units]
-                  length = √(100²+60²) = √13600 ≈ 116.6 → dasharray 117
-
-                Line BC (flat left side): x = −5  [math]
-                  from B(−50,−60) to C(−50,60) → length = 120
-
-                Line CA: from C(−50,60) to A(50,0)
-                  slope = (0−60)/(50−(−50)) = −60/100 = −3/5
-                  y − 0 = −3/5(x − 5)  →  y = −3/5·x + 3   [math units]
-                  length ≈ 117
-            -->
-            <!-- Triangle fill (drawn last) -->
             <polygon id="svg-fill" points="50,0 -50,-60 -50,60"
                 fill="rgba(201,168,76,0)" stroke="none"
                 style="transition:fill 0.9s ease,opacity 0.7s"/>
 
-            <!-- Line AB: A(50,0) → B(−50,−60)  top edge -->
             <line id="svg-line-ab" x1="50" y1="0" x2="-50" y2="-60"
                 stroke="rgba(201,168,76,0.6)" stroke-width="1.5"
                 style="stroke-dasharray:117;stroke-dashoffset:117;transition:opacity 0.5s"/>
-            <!-- Line BC: B(−50,−60) → C(−50,60)  flat left side -->
             <line id="svg-line-bc" x1="-50" y1="-60" x2="-50" y2="60"
                 stroke="rgba(201,168,76,0.6)" stroke-width="1.5"
                 style="stroke-dasharray:120;stroke-dashoffset:120;transition:opacity 0.5s"/>
-            <!-- Line CA: C(−50,60) → A(50,0)  bottom edge -->
             <line id="svg-line-ca" x1="-50" y1="60" x2="50" y2="0"
                 stroke="rgba(201,168,76,0.6)" stroke-width="1.5"
                 style="stroke-dasharray:117;stroke-dashoffset:117;transition:opacity 0.5s"/>
 
-            <!-- Vertex dots (fade out after animation) -->
             <circle class="vdot" cx="50"  cy="0"   r="2.5" fill="rgba(201,168,76,0.7)" style="opacity:0;transition:opacity 0.3s"/>
             <circle class="vdot" cx="-50" cy="-60" r="2.5" fill="rgba(201,168,76,0.7)" style="opacity:0;transition:opacity 0.3s"/>
             <circle class="vdot" cx="-50" cy="60"  r="2.5" fill="rgba(201,168,76,0.7)" style="opacity:0;transition:opacity 0.3s"/>
-            <!-- Vertex labels (fade out after animation) -->
             <text class="vlbl" x="57"  y="5"   fill="rgba(201,168,76,0.65)" font-family="'Cormorant Garamond',serif" font-size="11" font-style="italic" style="opacity:0;transition:opacity 0.3s">A</text>
             <text class="vlbl" x="-65" y="-62" fill="rgba(201,168,76,0.65)" font-family="'Cormorant Garamond',serif" font-size="11" font-style="italic" style="opacity:0;transition:opacity 0.3s">B</text>
             <text class="vlbl" x="-65" y="70"  fill="rgba(201,168,76,0.65)" font-family="'Cormorant Garamond',serif" font-size="11" font-style="italic" style="opacity:0;transition:opacity 0.3s">C</text>
         </svg>
 
-        <!-- Formula shown during animation -->
         <div id="formula-display">
             <span id="formula-text"></span>
         </div>
 
-        <!-- "Click to begin" hint shown after animation -->
         <div id="play-hint">click to begin</div>
-    </div><!-- end #math-phase -->
+    </div>
 
     <button id="skip-intro">Skip →</button>
-</div><!-- end #splash-screen -->
+</div>
 
 <!-- ====== EXPERIENCE ====== -->
 <div id="experience">
@@ -419,6 +523,72 @@
     </div>
     <div class="dash-grid" id="dash-grid"></div>
     <button class="replay-btn" id="replay-btn">Replay Full Experience</button>
+
+    <!-- ====== CLOUD EASTER EGG ====== -->
+    <div id="cloud-egg">
+
+        <div id="cloud-mist" role="button" aria-label="A mysterious cloud, click to reveal" tabindex="0">
+            <!-- SVG cloud shape — wispy, layered mist -->
+            <svg id="cloud-svg" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <filter id="mist-blur">
+                        <feGaussianBlur stdDeviation="5 3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <radialGradient id="cloud-fade-center" cx="50%" cy="60%" r="55%">
+                        <stop offset="0%"   stop-color="rgba(201,168,76,0.18)"/>
+                        <stop offset="60%"  stop-color="rgba(201,168,76,0.09)"/>
+                        <stop offset="100%" stop-color="rgba(201,168,76,0)"/>
+                    </radialGradient>
+                    <radialGradient id="cloud-fade-l" cx="20%" cy="70%" r="35%">
+                        <stop offset="0%"   stop-color="rgba(232,213,163,0.10)"/>
+                        <stop offset="100%" stop-color="rgba(232,213,163,0)"/>
+                    </radialGradient>
+                    <radialGradient id="cloud-fade-r" cx="80%" cy="70%" r="35%">
+                        <stop offset="0%"   stop-color="rgba(232,213,163,0.08)"/>
+                        <stop offset="100%" stop-color="rgba(232,213,163,0)"/>
+                    </radialGradient>
+                </defs>
+
+                <!-- Bottom mist wisps (softest, widest) -->
+                <ellipse cx="160" cy="98" rx="148" ry="14" fill="url(#cloud-fade-center)" filter="url(#mist-blur)"/>
+                <ellipse cx="80"  cy="102" rx="80"  ry="10" fill="url(#cloud-fade-l)"      filter="url(#mist-blur)"/>
+                <ellipse cx="240" cy="102" rx="80"  ry="10" fill="url(#cloud-fade-r)"      filter="url(#mist-blur)"/>
+
+                <!-- Main cloud body -->
+                <ellipse cx="160" cy="72" rx="130" ry="32" fill="url(#cloud-fade-center)" filter="url(#mist-blur)"/>
+
+                <!-- Upper cloud puffs -->
+                <ellipse cx="100" cy="52" rx="62" ry="26" fill="rgba(201,168,76,0.12)" filter="url(#mist-blur)"/>
+                <ellipse cx="200" cy="48" rx="70" ry="28" fill="rgba(201,168,76,0.10)" filter="url(#mist-blur)"/>
+                <ellipse cx="155" cy="36" rx="55" ry="22" fill="rgba(232,213,163,0.11)" filter="url(#mist-blur)"/>
+
+                <!-- Gossamer top wisps -->
+                <ellipse cx="130" cy="22" rx="38" ry="12" fill="rgba(201,168,76,0.07)" filter="url(#mist-blur)"/>
+                <ellipse cx="185" cy="18" rx="32" ry="10" fill="rgba(201,168,76,0.06)" filter="url(#mist-blur)"/>
+            </svg>
+
+            <!-- Text floating inside the cloud -->
+            <div class="cloud-label">
+                <span class="cloud-label-main">Hmm? I wonder what this could be…</span>
+                <span class="cloud-label-sub">click me</span>
+            </div>
+        </div>
+
+        <!-- Revealed: perk.png + caption -->
+        <div id="perk-reveal">
+            <div id="perk-inner">
+                <img id="perk-img" src="perk.png" alt="A special perk from Mrs Muhammad"
+                     onerror="this.style.display='none'">
+                <p id="perk-caption">
+                    You always gave me these so here's one for you too!
+                    <span class="perk-sig">— Muhammad</span>
+                </p>
+            </div>
+        </div>
+
+    </div><!-- end #cloud-egg -->
+
 </div>
 
 <!-- ====== MODAL ====== -->
@@ -431,7 +601,7 @@
 
 <script>
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  CONFIGURATION — EDIT THESE VALUES                         ║
+// ║  CONFIGURATION                                              ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 var YOUTUBE_VIDEOS = [
@@ -440,7 +610,6 @@ var YOUTUBE_VIDEOS = [
     'X25_qPTS__o'
 ];
 
-// Optional gentle background music video ID (leave '' for none)
 var MUSIC_YOUTUBE_ID = '';
 
 var MESSAGE_1_NAME = 'Saleha Ali Haji';
@@ -467,6 +636,32 @@ var PH = 'REPLACE_WITH_VIDEO_ID_';
 
 function sched(fn, d) { animTimers.push(setTimeout(fn, d)); }
 function clearAnim()  { animTimers.forEach(clearTimeout); animTimers = []; }
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  CLOUD EASTER EGG                                           ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function initCloudEgg() {
+    var cloud  = document.getElementById('cloud-mist');
+    var reveal = document.getElementById('perk-reveal');
+    if (!cloud || !reveal) return;
+
+    function triggerReveal() {
+        if (cloud.classList.contains('revealed')) return;
+        cloud.classList.add('revealed');
+        reveal.classList.add('open');
+        // Scroll smoothly to the revealed content
+        setTimeout(function() {
+            reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
+
+    cloud.addEventListener('click', triggerReveal);
+    cloud.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerReveal(); }
+    });
+}
 
 
 // ╔══════════════════════════════════════════════════════════════╗
@@ -503,15 +698,6 @@ function spawnSymbols() {
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  MATH ANIMATION                                             ║
-// ║                                                             ║
-// ║  Triangle ▶ pointing RIGHT                                  ║
-// ║  A(5,0) B(−5,−6) C(−5,6)  [math units; ×10 = SVG coords]  ║
-// ║  A(50,0) B(−50,−60) C(−50,60) [SVG]                        ║
-// ║                                                             ║
-// ║  Lines:                                                     ║
-// ║   AB: y = 3/5·(x − 5)  [top edge, A→B]                    ║
-// ║   BC: x = −5            [flat left side, B→C]              ║
-// ║   CA: y = −3/5·(x − 5) [bottom edge, C→A]                 ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 function showFormula(txt) {
@@ -523,22 +709,17 @@ function setOp(id, v) { var e = document.getElementById(id); if (e) e.style.opac
 function addCls(id, c) { var e = document.getElementById(id); if (e) e.classList.add(c); }
 
 function runMathAnimation() {
-    // Grid appears
     sched(function() { setOp('svg-grid',  '1'); }, 0);
     sched(function() { setOp('svg-mgrid', '1'); }, 150);
     sched(function() { setOp('svg-axes',  '1'); }, 350);
 
-    // — CIRCLE — x² + y² = 9²
     sched(function() { showFormula('x\u00B2 + y\u00B2 = 9\u00B2'); }, 600);
     sched(function() { addCls('svg-circle', 'drawing'); }, 780);
-    // Circle done ~2280ms; pulse
     sched(function() { addCls('svg-circle', 'pulse'); }, 2350);
 
-    // — LINE AB — top edge: y = 3/5(x − 5)
     sched(function() { showFormula('y = \u00BE\u2085(x \u2212 5)'); }, 2600);
     sched(function() {
         addCls('svg-line-ab', 'drawing');
-        // Show vertex dots A and B
         var dots = document.querySelectorAll('.vdot');
         var lbls = document.querySelectorAll('.vlbl');
         if (dots[0]) dots[0].style.opacity = '1';
@@ -547,11 +728,9 @@ function runMathAnimation() {
         if (lbls[1]) lbls[1].style.opacity = '1';
     }, 2800);
 
-    // — LINE BC — flat left: x = −5
     sched(function() { showFormula('x = \u22125'); }, 3350);
     sched(function() { addCls('svg-line-bc', 'drawing'); }, 3550);
 
-    // — LINE CA — bottom edge: y = −3/5(x − 5)
     sched(function() { showFormula('y = \u2212\u00BE\u2085(x \u2212 5)'); }, 4000);
     sched(function() {
         addCls('svg-line-ca', 'drawing');
@@ -561,17 +740,11 @@ function runMathAnimation() {
         if (lbls[2]) lbls[2].style.opacity = '1';
     }, 4200);
 
-    // — AREA — integration formula
     sched(function() { showFormula('A = \u222B\u208B\u2085\u2075 [f(x) \u2212 g(x)] dx'); }, 4700);
-
-    // — FILL — triangle fills with colour
     sched(function() { addCls('svg-fill', 'filled'); }, 5100);
     sched(function() { addCls('svg-fill', 'pulse');  }, 5900);
 
-    // — TRANSITION to interactive play button
     sched(transitionToClean, 6400);
-
-    // Show skip hint after a moment
     sched(function() { document.getElementById('skip-intro').classList.add('visible'); }, 2500);
 }
 
@@ -583,44 +756,35 @@ function transitionToClean() {
     var fd = document.getElementById('formula-display');
     si.style.display = 'none';
 
-    // Step 1: fade formula + vertex labels/dots
     fd.style.opacity = '0';
     document.querySelectorAll('.vdot,.vlbl').forEach(function(e) { e.style.opacity = '0'; });
 
-    // Step 2: fade out grid, axes (keep circle + triangle)
     sched(function() {
         setOp('svg-grid',  '0');
         setOp('svg-mgrid', '0');
         setOp('svg-axes',  '0');
     }, 200);
 
-    // Step 3: enhance circle and fill to look polished
     sched(function() {
         var c = document.getElementById('svg-circle');
         if (c) { c.style.stroke = 'rgba(201,168,76,0.7)'; c.style.strokeWidth = '2'; }
         var f = document.getElementById('svg-fill');
         if (f) { f.style.fill = 'rgba(201,168,76,0.22)'; }
-        // Slightly thicken triangle lines
         ['svg-line-ab','svg-line-bc','svg-line-ca'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) { el.style.stroke = 'rgba(201,168,76,0.7)'; el.style.strokeWidth = '2'; }
         });
     }, 500);
 
-    // Step 4: activate ripple rings
     sched(function() {
         document.getElementById('svg-ripple1').classList.add('active');
         document.getElementById('svg-ripple2').classList.add('active');
     }, 700);
 
-    // Step 5: fade in formula display area as empty (hide height)
     sched(function() { fd.style.display = 'none'; }, 600);
-
-    // Step 6: fade in title and subtitle
     sched(function() { document.getElementById('sp-title').style.opacity = '1'; }, 750);
     sched(function() { document.getElementById('sp-sub').style.opacity   = '1'; }, 1050);
 
-    // Step 7: make SVG clickable and show hint
     sched(function() {
         var mp = document.getElementById('math-phase');
         mp.classList.add('interactive');
@@ -785,6 +949,9 @@ function showDashboard() {
     g.appendChild(mc);
 
     document.getElementById('dashboard').classList.add('visible');
+
+    // Init cloud easter egg after dashboard renders
+    setTimeout(initCloudEgg, 400);
 }
 
 function replayExperience() {
@@ -848,16 +1015,13 @@ function openMessagesModal() {
 // ╚══════════════════════════════════════════════════════════════╝
 
 (function init() {
-    // Populate message cards
     document.getElementById('msg-text-1').textContent = MESSAGE_1_TEXT;
     document.getElementById('msg-name-1').textContent = MESSAGE_1_NAME;
     document.getElementById('msg-text-2').textContent = MESSAGE_2_TEXT;
     document.getElementById('msg-name-2').textContent = MESSAGE_2_NAME;
 
-    // Spawn floating symbols
     spawnSymbols();
 
-    // Wire buttons
     document.getElementById('skip-btn').addEventListener('click', skipToNext);
     document.getElementById('skip-intro').addEventListener('click', skipToClean);
     document.getElementById('replay-btn').addEventListener('click', replayExperience);
@@ -867,7 +1031,6 @@ function openMessagesModal() {
     });
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 
-    // Check if already played → show dashboard
     try {
         if (localStorage.getItem('farewell_mrs_muhammad_played') === 'true') {
             showDashboard();
@@ -876,11 +1039,9 @@ function openMessagesModal() {
         }
     } catch(e) {}
 
-    // Load YouTube API and start animation
     loadYTAPI();
     runMathAnimation();
 
-    // Fallback: if user hits play before API is ready, skip to image
     setTimeout(function() {
         if (!apiReady && started) hideVideoShowImage();
     }, 12000);
